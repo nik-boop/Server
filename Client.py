@@ -1,16 +1,20 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 import socket
 
 sock = socket.socket()
 sock.connect(('localhost', 9090))
+print(f'Conectin is done',
+      f'    my: {sock.getsockname()}',
+      f'server: {sock.getpeername()}', sep='\n')
 
 while True:
+
     word = input()
     sock.send(word.encode())
-    data = sock.recv(1024).decode()
-    if "EXIT" in data:
+    if "exit" in word.lower() or "quit" in word.lower():
         sock.close()
-        break
+        print('Soket close')
+        exit()
+
+
+    data = sock.recv(1024).decode()
     print(data)

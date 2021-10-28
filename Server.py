@@ -1,22 +1,33 @@
-#!/usr/bin/env python
-
 import socket
+def listen(sock):
+    print(f'Start listening ')
+    sock.listen(1)
+    conn, addr = sock.accept()
+    print(f'connection done\n'
+          f'client:{addr}')
+    return (conn, addr)
 
+print('Srart Server!')
 sock = socket.socket()
-sock.bind(('', 9090))
-sock.listen(1)
-conn, addr = sock.accept()
+sock.bind(('localhost', 9090))
 
-print('connected:', addr)
+
+(conn, addr) = listen(sock)
+
 
 while True:
-    while True:
-        data = conn.recv(1024).decode()
-        if not data:
-            break
-        conn.send(data.upper().encode())
-        if "exit".lower() in data:
-            break
-    if ("exit".lower() in data) or not data:
-        break
-conn.close()
+    data = conn.recv(1024).decode()
+    print(f'get_mes\n'
+          f'    len: {len(data)}Byte')
+
+
+    conn.send(data.upper().encode())
+    print(f'send_mes\n'
+          f'    len: {len(data)}Byte')
+    if 'exit' in data.lower():
+        print('Sock is close')
+        conn, addr = listen(sock)
+    if 'quit' in data.lower():
+        print('Exit!')
+        exit()
+
