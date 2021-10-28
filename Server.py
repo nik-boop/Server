@@ -17,13 +17,11 @@ sock.bind(('localhost', 9090))
 
 while True:
     data = conn.recv(1024).decode()
-    print(f'get_mes\n'
-          f'    len: {len(data)}Byte')
+    print(f'get_mes len: {len(data)}Byte'.ljust(20), end='    ')
 
 
     conn.send(data.upper().encode())
-    print(f'send_mes\n'
-          f'    len: {len(data)}Byte')
+    print(f'send_mes len: {len(data)}Byte')
     if 'exit' in data.lower():
         print('Sock is close')
         conn, addr = listen(sock)
