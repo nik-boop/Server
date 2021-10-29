@@ -34,6 +34,7 @@ while True:
 
     print(f'send_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ", end='\n')
     if 'exit' in data.lower():
+        print(f'\ndisconnect: {addr} ')
         print('Sock is close')
         conn, addr = listen(sock)
         Captions()
