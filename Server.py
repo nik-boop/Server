@@ -1,9 +1,10 @@
 import socket
+import time
 def listen(sock):
-    print(f'Start listening ')
+    print(f'Start listening')
     sock.listen(1)
     conn, addr = sock.accept()
-    print(f'connection done\n'
+    print(f'Connection is done\n'
           f'client:{addr}')
     return (conn, addr)
 
@@ -14,17 +15,28 @@ sock.bind(('localhost', 9090))
 
 (conn, addr) = listen(sock)
 
-
+def Captions():
+    print(f'get_mes len'.ljust(20), f"get_time".ljust(7),
+          f'send_mes len'.ljust(20), f"send_time".ljust(7),
+          sep="    ", end='\n')
+Captions()
 while True:
+
     data = conn.recv(1024).decode()
-    print(f'get_mes len: {len(data)}Byte'.ljust(20), end='    ')
 
+    t = time.strftime('%H:%M:%S', time.localtime())
+    print(f'get_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ",  end='    ')
 
-    conn.send(data.upper().encode())
-    print(f'send_mes len: {len(data)}Byte')
+    if data == 'None':
+        data = f'-'
+    data = f'Seerver: {data}'
+    conn.send(data.encode())
+
+    print(f'send_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ", end='\n')
     if 'exit' in data.lower():
         print('Sock is close')
         conn, addr = listen(sock)
+        Captions()
     if 'quit' in data.lower():
         print('Exit!')
         exit()

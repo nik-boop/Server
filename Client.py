@@ -8,7 +8,9 @@ print(f'Conectin is done',
 
 while True:
 
-    word = input()
+    word = input('Message: ')
+    if word == '':
+        word = f'{None}'
     sock.send(word.encode())
     if "exit" in word.lower() or "quit" in word.lower():
         sock.close()
@@ -17,4 +19,4 @@ while True:
 
 
     data = sock.recv(1024).decode()
-    print(data)
+    print(f'{data}\n')
