@@ -11,6 +11,7 @@ ls_mes = []
 ls_all_mes = []
 mess = []
 del_dict = {}
+lock = threading.Lock()
 
 def Exit():
     global fex
@@ -27,6 +28,7 @@ def get_inf():
         if dict_us.get(addr) is None:
             dict_us.setdefault(addr, data[1])
             print(f"App user {data[1]}")
+            del_dict.setdefault(addr, True)
         else:
             print(f'Пользователь {data[1]} уже сушествует')
 
@@ -37,13 +39,18 @@ def get_inf():
             continue
         else:
             ls_all_mes.append(
-                (time.strftime('%H:%M:%S', time.localtime()),
-                 addr,
-                 len(data),
-                 dict_us.get(addr, "noname_user"),
-                 data)
+                (
+                    "Get",
+                    time.strftime('%H:%M:%S', time.localtime()),
+                    addr,
+                    len(data),
+                    dict_us.get(addr, "noname_user"),
+                    data
+                )
             )
+
             data = data.decode()
+
             if 'nik<>' in data:
                 get_nik_name(data, addr)
                 sock.sendto('User_create'.encode(), addr)
@@ -51,17 +58,20 @@ def get_inf():
                 del_us(addr)
                 sock.sendto('User_delete'.encode(), addr)
             else:
-                ls_mes.append((dict_us[addr], addr, data))
-                if data == "exo":
-                    if type(del_dict.setdefault(addr, True)) == int:
+                if data == "exos":
+                    if type(del_dict[addr]) == float:
                         del_dict[addr] = True
                 else:
+                    ls_mes.append((dict_us[addr], addr, data))
                     mess.append((data, addr))
 
+            lock.acquire()
+            try:
+                t = ls_all_mes[-1][1]
+                print(f'get_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ", end='\n')
+            finally:
+                lock.release()
 
-
-            t = ls_all_mes[-1][0]
-            print(f'get_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ", end='\n')
 def del_us(addr):
     global dict_us
     print(f'User_delete {addr}: {dict_us.pop(addr, "del failed")}')
@@ -75,28 +85,33 @@ def send_mes():
             (mes, addrm) = mess.pop(0)
             for addr, nik in dict_us.items():
                 if addr != addrm:
-                    data = f"{nik}: {mes}".encode()
+                    data = f"\033[96m {nik}: {mes}".encode()
                     sock.sendto(data, addr)
-                    sock.sendto('exo'.encode(), addr)
-                    del_dict[addr] = (time.time())
+                    sock.sendto('exoc'.encode(), addr)
+                    del_dict[addr] = time.time()
                     k += 1
                     weight_mes += len(data)
-
-            print(f"send mes all: col_mes {k}, weight_all_mes {weight_mes}Byte")
+            lock.acquire()
+            try:
+                print(f"send mes all: col_mes {k}, weight_all_mes {weight_mes}Byte")
+            finally:
+                lock.release()
         else:
             continue
 
 def check_del():
     while True:
-        if len(del_dict) != 0:
-            del_list = []
+        del_list = []
+        lock.acquire()
+        try:
             for addr, t in del_dict.items():
-                if t == True:
-                    del_dict.pop(addr)
-                elif time.time() - t > 60:
+                if t != True and time.time() - t > 10:
                     del_us(addr)
-                    del_dict.pop(addr)
-
+                    del_list.append(addr)
+            for i in del_list:
+                del_dict.pop(i)
+        finally:
+            lock.release()
 
 def Input():
     global dict_us

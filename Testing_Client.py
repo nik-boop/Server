@@ -36,8 +36,8 @@ def getmes():
             except BlockingIOError as err:
                 pass
             else:
-                if data == 'exo':
-                    sock.sendto('exo'.encode(), addr)
+                if data == 'exoc':
+                    sock.sendto('exos'.encode(), addr)
                 else:
                     print(addr, data)
         except socket.error as err:
