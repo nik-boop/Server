@@ -8,12 +8,13 @@ def listen(sock):
           f'client:{addr}')
     return (conn, addr)
 
-print('Srart Server!')
+print(f'Srart Server! ("localhost"", 9090)')
 sock = socket.socket()
 sock.bind(('localhost', 9090))
 
 
 (conn, addr) = listen(sock)
+
 
 def Captions():
     print(f'get_mes len'.ljust(20), f"get_time".ljust(7),
@@ -31,7 +32,7 @@ while True:
         data = f'-'
     data = f'Seerver: {data}'
     conn.send(data.encode())
-
+    t = time.strftime('%H:%M:%S', time.localtime())
     print(f'send_mes len: {len(data)}Byte'.ljust(20), f'{t}'.ljust(7), sep="    ", end='\n')
     if 'exit' in data.lower():
         print(f'\ndisconnect: {addr} ')
@@ -39,6 +40,6 @@ while True:
         conn, addr = listen(sock)
         Captions()
     if 'quit' in data.lower():
-        print('Exit!')
+        print('Server is close!')
         exit()
 
