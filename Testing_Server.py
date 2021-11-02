@@ -85,7 +85,7 @@ def send_mes():
             (mes, addrm) = mess.pop(0)
             for addr, nik in dict_us.items():
                 if addr != addrm:
-                    data = f"\033[96m {nik}: {mes}".encode()
+                    data = f"\33[ {nik}: {mes}".encode()
                     sock.sendto(data, addr)
                     sock.sendto('exoc'.encode(), addr)
                     del_dict[addr] = time.time()
