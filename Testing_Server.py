@@ -37,6 +37,8 @@ def get_inf():
             data, addr = sock.recvfrom(1024)
         except BlockingIOError as err:
             continue
+        except ConnectionResetError as err:
+            continue
         else:
             ls_all_mes.append(
                 (
@@ -104,7 +106,8 @@ def check_del():
         del_list = []
         lock.acquire()
         try:
-            for addr, t in del_dict.items():
+            del_dictc = del_dict.copy()
+            for addr, t in del_dictc.items():
                 if t != True and time.time() - t > 10:
                     del_us(addr)
                     del_list.append(addr)
