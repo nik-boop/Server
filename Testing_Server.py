@@ -19,18 +19,20 @@ def Exit():
 
 
 def get_inf():
+    '''Прием информации от клиентов'''
     print("Server stert!")
     global dict_us
 
     def get_nik_name(data, addr):
+        '''Создание или перезапись ника клиента'''
         global dict_us
         data = data.split('<>')
         if dict_us.get(addr) is None:
-            dict_us.setdefault(addr, data[1])
             print(f"App user {data[1]}")
-            del_dict.setdefault(addr, True)
         else:
-            print(f'Пользователь {data[1]} уже сушествует')
+            print(f'Reset user {data[1]}')
+        dict_us[addr] = data[1]
+        del_dict[addr] = True
 
     while True:
         try:
@@ -50,22 +52,21 @@ def get_inf():
                     data
                 )
             )
-
+            dict_us.setdefault(addr, 'no_name')
             data = data.decode()
 
             if 'nik<>' in data:
                 get_nik_name(data, addr)
-                sock.sendto('User_create'.encode(), addr)
-            elif 'exit' == data:
+                sock.sendto('User_set'.encode(), addr)
+            elif data == 'exit':
                 del_us(addr)
                 sock.sendto('User_delete'.encode(), addr)
+            elif data == "exos":
+                if type(del_dict.get(addr)) == float:
+                    del_dict[addr] = True
             else:
-                if data == "exos":
-                    if type(del_dict[addr]) == float:
-                        del_dict[addr] = True
-                else:
-                    ls_mes.append((dict_us[addr], addr, data))
-                    mess.append((data, addr))
+                ls_mes.append((dict_us[addr], addr, data))
+                mess.append((data, addr))
 
             lock.acquire()
             try:
@@ -80,6 +81,9 @@ def del_us(addr):
 
 
 def send_mes():
+    '''
+    Отправка сообщений пользователям
+    '''
     while True:
         if len(mess) != 0:
             k = 0
@@ -87,7 +91,7 @@ def send_mes():
             (mes, addrm) = mess.pop(0)
             for addr, nik in dict_us.items():
                 if addr != addrm:
-                    data = f"\33[ {nik}: {mes}".encode()
+                    data = f"\33[ {dict_us[addr]}: {mes}".encode()
                     sock.sendto(data, addr)
                     sock.sendto('exoc'.encode(), addr)
                     del_dict[addr] = time.time()
@@ -102,6 +106,9 @@ def send_mes():
             continue
 
 def check_del():
+    '''
+    Проверка на отлючившихся пользователей
+    '''
     while True:
         del_list = []
         lock.acquire()
@@ -117,6 +124,7 @@ def check_del():
             lock.release()
 
 def Input():
+    '''Команды консоли сервера'''
     global dict_us
     while True:
         data = input()
@@ -145,8 +153,7 @@ def Input():
 get_inft = threading.Thread(target=get_inf, name='get_inf')
 get_inft.daemon = True
 get_inft.start()
-'''get_nik_namet = threading.Thread(target=get_nik_name, name='get_use')
-get_nik_namet.start()'''
+
 Inputt = threading.Thread(target=Input, name='Input')
 Inputt.daemon = True
 Inputt.start()

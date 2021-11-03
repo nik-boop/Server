@@ -19,12 +19,19 @@ def Exit():
 def send():
     while True:
         data = input()
-        try:
-            sock.sendto(data.encode(), servaddr)
-            if data == 'exit':
-                Exit()
-        except socket.error as err:
-            print(1, err)
+        if data == 'com_inf':
+            print("nik<>nik_name - создатть или перезапимать ник")
+            print('exit - завершить клиентсий сеанс')
+        elif data == 'help':
+            print('com_inf - cправка по командам'
+                  'для отправки сообщения используйте консоль, ')
+        else:
+            try:
+                sock.sendto(data.encode(), servaddr)
+                if data == 'exit':
+                    Exit()
+            except socket.error as err:
+                print(1, err)
 
 
 def getmes():
